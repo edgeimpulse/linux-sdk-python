@@ -7,6 +7,15 @@ This library lets you run machine learning models and collect sensor data on Lin
 1. Install a recent version of [Python 3](https://www.python.org/downloads/).
 1. Install the SDK:
 
+    **Raspberry Pi**
+
+    ```
+    $ sudo apt-get install libatlas-base-dev libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev
+    $ pip3 install edge_impulse_linux -i https://pypi.python.org/simple
+    ```
+
+    **Other platforms**
+
     ```
     $ pip3 install edge_impulse_linux
     ```
