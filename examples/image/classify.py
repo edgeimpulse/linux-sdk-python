@@ -102,7 +102,10 @@ def main(argv):
                         print('%s: %.2f\t' % (label, score), end='')
                     print('', flush=True)
                     #cv2.imshow('edgeimpulse',img)
-                    #cv2.waitKey(1)
+                    #if cv2.waitKey(1) == ord('q'):
+                    #    break
+            
+                
                 elif "bounding_boxes" in res["result"].keys():
                     print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     for bb in res["result"]["bounding_boxes"]:
