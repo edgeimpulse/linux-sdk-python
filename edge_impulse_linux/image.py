@@ -50,16 +50,39 @@ class ImageImpulseRunner(ImpulseRunner):
             success, img = self.videoCapture.read()
             if success:
                 features = []
+
+                EI_CLASSIFIER_INPUT_WIDTH = self.dim[0]
+                EI_CLASSIFIER_INPUT_HEIGHT = self.dim[1]
+
+                in_frame_cols = img.shape[1]
+                in_frame_rows = img.shape[0]
+
+                factor_w = EI_CLASSIFIER_INPUT_WIDTH / in_frame_cols
+                factor_h = EI_CLASSIFIER_INPUT_HEIGHT / in_frame_rows
+
+                largest_factor = factor_w if factor_w > factor_h else factor_h
+
+                resize_size_w = int(largest_factor * in_frame_cols)
+                resize_size_h = int(largest_factor * in_frame_rows)
+                resize_size = (resize_size_w, resize_size_h)
+
+                resized = cv2.resize(img, resize_size, interpolation = cv2.INTER_AREA)
+
+                crop_x = int((resize_size_w - resize_size_h) / 2) if resize_size_w > resize_size_h else 0
+                crop_y = int((resize_size_h - resize_size_w) / 2) if resize_size_h > resize_size_w else 0
+
+                crop_region = (crop_x, crop_y, EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT)
+
+                cropped = resized[crop_region[1]:crop_region[1]+crop_region[3], crop_region[0]:crop_region[0]+crop_region[2]]
+
                 if self.isGrayscale:
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                    resizedImg = cv2.resize(img, self.dim, interpolation = cv2.INTER_AREA)
-                    pixels = np.array(resizedImg).flatten().tolist()
+                    cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+                    pixels = np.array(cropped).flatten().tolist()
 
                     for p in pixels:
                         features.append((p << 16) + (p << 8) + p)
                 else:
-                    resizedImg = cv2.resize(img, self.dim, interpolation = cv2.INTER_AREA)
-                    pixels = np.array(resizedImg).flatten().tolist()
+                    pixels = np.array(cropped).flatten().tolist()
 
                     for ix in range(0, len(pixels), 3):
                         b = pixels[ix + 0]
@@ -68,4 +91,4 @@ class ImageImpulseRunner(ImpulseRunner):
                         features.append((r << 16) + (g << 8) + b)
 
                 res = self.classify(features)
-                yield res, img
+                yield res, cropped

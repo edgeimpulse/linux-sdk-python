@@ -8,6 +8,7 @@ import time
 from edge_impulse_linux.image import ImageImpulseRunner
 
 runner = None
+show_camera = False
 
 def now():
     return round(time.time() * 1000)
@@ -80,7 +81,7 @@ def main(argv):
             camera = cv2.VideoCapture(videoCaptureDeviceId)
             ret = camera.read()[0]
             if ret:
-                backendName =camera.getBackendName()
+                backendName = camera.getBackendName()
                 w = camera.get(3)
                 h = camera.get(4)
                 print("Camera %s (%s x %s) in port %s selected." %(backendName,h,w, videoCaptureDeviceId))
@@ -94,18 +95,20 @@ def main(argv):
                 if (next_frame > now()):
                     time.sleep((next_frame - now()) / 1000)
 
-                #print(res["result"])
+                # print('classification runner response', res)
+
                 if "classification" in res["result"].keys():
                     print('Result (%d ms.) ' % (res['timing']['dsp'] + res['timing']['classification']), end='')
                     for label in labels:
                         score = res['result']['classification'][label]
                         print('%s: %.2f\t' % (label, score), end='')
                     print('', flush=True)
-                    #cv2.imshow('edgeimpulse',img)
-                    #if cv2.waitKey(1) == ord('q'):
-                    #    break
-            
-                
+
+                    if (show_camera):
+                        cv2.imshow('edgeimpulse', img)
+                        if cv2.waitKey(1) == ord('q'):
+                            break
+
                 elif "bounding_boxes" in res["result"].keys():
                     print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     for bb in res["result"]["bounding_boxes"]:
