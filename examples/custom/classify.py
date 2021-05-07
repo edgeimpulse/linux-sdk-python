@@ -39,7 +39,10 @@ def main(argv):
 
     features_file = io.open(args[1], 'r', encoding='utf8')
     features = features_file.read().strip().split(",")
-    features = [float(f) for f in features]
+    if '0x' in features[0]:
+        features = [float(int(f, 16)) for f in features]
+    else:
+        features = [float(f) for f in features]
 
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
