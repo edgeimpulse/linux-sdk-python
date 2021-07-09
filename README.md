@@ -56,6 +56,7 @@ Then you can start classifying realtime sensor data. We have examples for:
 
 * [Audio](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/audio/classify.py) - grabs data from the microphone and classifies it in realtime.
 * [Camera](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/image/classify.py) - grabs data from a webcam and classifies it in realtime.
+* [Camera (full frame)](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/image/classify.py) - grabs data from a webcam and classifies it twice (once cut from the left, once cut from the right). This is useful if you have a wide-angle lense and don't want to miss any events.
 * [Still image](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/image/classify-image.py) - classifies a still image from your hard drive.
 * [Custom data](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/custom/classify.py) - classifies custom sensor data.
 

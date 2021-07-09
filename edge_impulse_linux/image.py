@@ -44,6 +44,13 @@ class ImageImpulseRunner(ImpulseRunner):
     def classify(self, data):
         return super(ImageImpulseRunner, self).classify(data)
 
+    def get_frames(self, videoDeviceId = 0):
+        self.videoCapture = cv2.VideoCapture(videoDeviceId)
+        while not self.closed:
+            success, img = self.videoCapture.read()
+            if success:
+                yield img
+
     def classifier(self, videoDeviceId = 0):
         self.videoCapture = cv2.VideoCapture(videoDeviceId)
         while not self.closed:
@@ -54,7 +61,7 @@ class ImageImpulseRunner(ImpulseRunner):
                 res = self.classify(features)
                 yield res, cropped
 
-    def get_features_from_image(self, img):
+    def get_features_from_image(self, img, crop_direction_x='center', crop_direction_y='center'):
         features = []
 
         EI_CLASSIFIER_INPUT_WIDTH = self.dim[0]
@@ -74,8 +81,23 @@ class ImageImpulseRunner(ImpulseRunner):
 
         resized = cv2.resize(img, resize_size, interpolation = cv2.INTER_AREA)
 
-        crop_x = int((resize_size_w - resize_size_h) / 2) if resize_size_w > resize_size_h else 0
-        crop_y = int((resize_size_h - resize_size_w) / 2) if resize_size_h > resize_size_w else 0
+        if (crop_direction_x == 'center'):
+            crop_x = int((resize_size_w - resize_size_h) / 2) if resize_size_w > resize_size_h else 0
+        elif (crop_direction_x == 'left'):
+            crop_x = 0
+        elif (crop_direction_x == 'right'):
+            crop_x = resize_size_w - EI_CLASSIFIER_INPUT_WIDTH
+        else:
+            raise Exception('Invalid value for crop_direction_x, should be center, left or right')
+
+        if (crop_direction_y == 'center'):
+            crop_y = int((resize_size_h - resize_size_w) / 2) if resize_size_h > resize_size_w else 0
+        elif (crop_direction_y == 'top'):
+            crop_y = 0
+        elif (crop_direction_y == 'bottom'):
+            crop_y = resize_size_h - EI_CLASSIFIER_INPUT_HEIGHT
+        else:
+            raise Exception('Invalid value for crop_direction_y, should be center, top or bottom')
 
         crop_region = (crop_x, crop_y, EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT)
 

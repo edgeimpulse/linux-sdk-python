@@ -42,6 +42,7 @@ def main(argv):
 
             img = cv2.imread(args[1])
 
+            # get_features_from_image also takes a crop direction arguments in case you don't have square images
             features, cropped = runner.get_features_from_image(img)
 
             # the image will be resized and cropped, save a copy of the picture here
