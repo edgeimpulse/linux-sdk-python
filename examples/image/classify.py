@@ -8,7 +8,7 @@ import time
 from edge_impulse_linux.image import ImageImpulseRunner
 
 runner = None
-show_camera = False
+show_camera = True
 
 def now():
     return round(time.time() * 1000)
@@ -104,15 +104,15 @@ def main(argv):
                         print('%s: %.2f\t' % (label, score), end='')
                     print('', flush=True)
 
-                    if (show_camera):
-                        cv2.imshow('edgeimpulse', img)
-                        if cv2.waitKey(1) == ord('q'):
-                            break
-
                 elif "bounding_boxes" in res["result"].keys():
                     print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     for bb in res["result"]["bounding_boxes"]:
                         print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
+
+                if (show_camera):
+                    cv2.imshow('edgeimpulse', img)
+                    if cv2.waitKey(1) == ord('q'):
+                        break
 
                 next_frame = now() + 100
         finally:
