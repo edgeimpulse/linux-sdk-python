@@ -111,7 +111,7 @@ def main(argv):
                         img = cv2.rectangle(img, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
                 if (show_camera):
-                    cv2.imshow('edgeimpulse', img)
+                    cv2.imshow('edgeimpulse', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
                     if cv2.waitKey(1) == ord('q'):
                         break
 

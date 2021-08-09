@@ -103,8 +103,8 @@ def main(argv):
                 res_l = runner.classify(features_l)
                 res_r = runner.classify(features_r)
 
-                cv2.imwrite('debug_l.jpg', cropped_l)
-                cv2.imwrite('debug_r.jpg', cropped_r)
+                cv2.imwrite('debug_l.jpg', cv2.cvtColor(cropped_l, cv2.COLOR_RGB2BGR))
+                cv2.imwrite('debug_r.jpg', cv2.cvtColor(cropped_r, cv2.COLOR_RGB2BGR))
 
                 def print_classification(res, tag):
                     if "classification" in res["result"].keys():
