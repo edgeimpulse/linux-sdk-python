@@ -16,10 +16,6 @@ class ImageImpulseRunner(ImpulseRunner):
         self.isGrayscale = False
 
     def init(self):
-        if psutil.OSX or psutil.MACOS:
-            print('Make sure that video devices access is granted for your application.')
-            print('If your video device is not responding, try running "tccutil reset Camera" to reset the camera access privileges')
-
         model_info = super(ImageImpulseRunner, self).init()
         width = model_info['model_parameters']['image_input_width'];
         height = model_info['model_parameters']['image_input_height'];
@@ -44,23 +40,36 @@ class ImageImpulseRunner(ImpulseRunner):
     def classify(self, data):
         return super(ImageImpulseRunner, self).classify(data)
 
+    # This returns images in RGB format (not BGR)
     def get_frames(self, videoDeviceId = 0):
+        if psutil.OSX or psutil.MACOS:
+            print('Make sure to grant the this script access to your webcam.')
+            print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
+
         self.videoCapture = cv2.VideoCapture(videoDeviceId)
         while not self.closed:
             success, img = self.videoCapture.read()
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             if success:
                 yield img
 
+    # This returns images in RGB format (not BGR)
     def classifier(self, videoDeviceId = 0):
+        if psutil.OSX or psutil.MACOS:
+            print('Make sure to grant the this script access to your webcam.')
+            print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
+
         self.videoCapture = cv2.VideoCapture(videoDeviceId)
         while not self.closed:
             success, img = self.videoCapture.read()
             if success:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 features, cropped = self.get_features_from_image(img)
 
                 res = self.classify(features)
                 yield res, cropped
 
+    # This expects images in RGB format (not BGR)
     def get_features_from_image(self, img, crop_direction_x='center', crop_direction_y='center'):
         features = []
 

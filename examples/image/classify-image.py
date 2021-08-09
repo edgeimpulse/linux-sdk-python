@@ -41,13 +41,19 @@ def main(argv):
             labels = model_info['model_parameters']['labels']
 
             img = cv2.imread(args[1])
+            if img is None:
+                print('Failed to load image', args[1])
+                exit(1)
+
+            # imread returns images in BGR format, so we need to convert to RGB
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             # get_features_from_image also takes a crop direction arguments in case you don't have square images
             features, cropped = runner.get_features_from_image(img)
 
             # the image will be resized and cropped, save a copy of the picture here
             # so you can see what's being passed into the classifier
-            cv2.imwrite('debug.jpg', cropped)
+            cv2.imwrite('debug.jpg', cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
 
             res = runner.classify(features)
 
