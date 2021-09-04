@@ -22,13 +22,15 @@ class Microphone():
         self.device_id = device_id
         self.zero_counter = 0
 
-        while not self.device_id or not self.checkDeviceModelCompatibility(self.device_id):
+        while self.device_id == None or not self.checkDeviceModelCompatibility(self.device_id):
             input_devices = self.listAvailableDevices()
             input_device_id = int(input("Type the id of the audio device you want to use: \n"))
             for device in input_devices:
                 if device[0] == input_device_id:
                       if self.checkDeviceModelCompatibility(input_device_id):
                           self.device_id = input_device_id
+                      else:
+                          print('That device is not compatible')
 
         print('selected Audio device: %i'% self.device_id)
 
