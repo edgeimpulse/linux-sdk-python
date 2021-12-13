@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import device_patches       # Device specific patches for Jetson Nano (needs to be before importing cv2)
+
 import cv2
 import os
 import sys, getopt
@@ -8,7 +10,10 @@ import time
 from edge_impulse_linux.image import ImageImpulseRunner
 
 runner = None
+# if you don't want to see a camera preview, set this to False
 show_camera = True
+if (sys.platform == 'linux' and not os.environ.get('DISPLAY')):
+    show_camera = False
 
 def now():
     return round(time.time() * 1000)
