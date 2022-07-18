@@ -47,15 +47,8 @@ def main(argv):
                 print('Failed to load image', args[1])
                 exit(1)
 
-            # imread returns images in BGR format, so we need to convert to RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
             # get_features_from_image also takes a crop direction arguments in case you don't have square images
             features, cropped = runner.get_features_from_image(img)
-
-            # the image will be resized and cropped, save a copy of the picture here
-            # so you can see what's being passed into the classifier
-            cv2.imwrite('debug.jpg', cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
 
             res = runner.classify(features)
 
@@ -70,6 +63,12 @@ def main(argv):
                 print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                 for bb in res["result"]["bounding_boxes"]:
                     print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
+                    cropped = cv2.rectangle(cropped, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
+
+            # the image will be resized and cropped, save a copy of the picture here
+            # so you can see what's being passed into the classifier
+            cv2.imwrite('debug.jpg', cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
+
         finally:
             if (runner):
                 runner.stop()
