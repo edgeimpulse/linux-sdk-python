@@ -122,9 +122,9 @@ class ImageImpulseRunner(ImpulseRunner):
             pixels = np.array(cropped).flatten().tolist()
 
             for ix in range(0, len(pixels), 3):
-                b = pixels[ix + 0]
+                r = pixels[ix + 0]
                 g = pixels[ix + 1]
-                r = pixels[ix + 2]
+                b = pixels[ix + 2]
                 features.append((r << 16) + (g << 8) + b)
 
         return features, cropped
