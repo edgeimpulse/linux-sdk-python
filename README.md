@@ -4,13 +4,13 @@ This library lets you run machine learning models and collect sensor data on Lin
 
 ## Installation guide
 
-1. Install a recent version of [Python 3](https://www.python.org/downloads/).
+1. Install a recent version of [Python 3](https://www.python.org/downloads/) and `pip` tools.
 1. Install the SDK:
 
     **Raspberry Pi**
 
     ```
-    $ sudo apt-get install libatlas-base-dev libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev
+    $ sudo apt-get install libatlas-base-dev libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev libopenjp2-7 libgtk-3-0 libswscale-dev libavformat58 libavcodec58
     $ pip3 install edge_impulse_linux -i https://pypi.python.org/simple
     ```
 
@@ -36,7 +36,7 @@ To collect data from the camera or microphone, follow the [getting started guide
 
 ### Collecting data from other sensors
 
-To collect data from other sensors you'll need to write some code to collect the data from an external sensor, wrap it in the Edge Impulse Data Acquisition format, and upload the data to the Ingestion service. [Here's an end-to-end example](https://github.com/edgeimpulse/linux-sdk-python/blob/master/custom/collect.py).
+To collect data from other sensors you'll need to write some code to collect the data from an external sensor, wrap it in the Edge Impulse Data Acquisition format, and upload the data to the Ingestion service. [Here's an end-to-end example](https://github.com/edgeimpulse/linux-sdk-python/blob/master/examples/custom/collect.py).
 
 ## Classifying data
 
