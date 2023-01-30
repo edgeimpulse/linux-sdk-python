@@ -99,7 +99,10 @@ class ImpulseRunner:
             if (not resp is None):
                 break
 
-        if (not resp or resp["id"] != ix):
+        if (resp is None):
+            raise Exception('No data or corrupted data received')
+
+        if (resp["id"] != ix):
             raise Exception('Wrong id, expected: ' + str(ix) + ' but got ' + resp["id"])
 
         if not resp["success"]:
