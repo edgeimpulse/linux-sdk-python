@@ -26,6 +26,8 @@ This library lets you run machine learning models and collect sensor data on Lin
     $ git clone https://github.com/edgeimpulse/linux-sdk-python
     ```
 
+    For the computer vision examples you'll want `opencv-python>=4.5.1.48`
+
 ## Collecting data
 
 Before you can classify data you'll first need to collect it. If you want to collect data from the camera or microphone on your system you can use the Edge Impulse CLI, and if you want to collect data from different sensors (like accelerometers or proprietary control systems) you can do so in a few lines of code.
