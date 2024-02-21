@@ -82,20 +82,22 @@ class ImageImpulseRunner(ImpulseRunner):
         factor_w = EI_CLASSIFIER_INPUT_WIDTH / in_frame_cols
         factor_h = EI_CLASSIFIER_INPUT_HEIGHT / in_frame_rows
 
+        # Maintain the same aspect ratio by scaling by the same factor for both dimensions
         largest_factor = factor_w if factor_w > factor_h else factor_h
 
         resize_size_w = int(math.ceil(largest_factor * in_frame_cols))
         resize_size_h = int(math.ceil(largest_factor * in_frame_rows))
+        # One dim will match the classifier size, the other will be larger
         resize_size = (resize_size_w, resize_size_h)
 
-        resized = cv2.resize(img, resize_size, interpolation = cv2.INTER_AREA)
+        resized = cv2.resize(img, resize_size, interpolation=cv2.INTER_AREA)
 
         if (crop_direction_x == 'center'):
-            crop_x = int((resize_size_w - resize_size_h) / 2) if resize_size_w > resize_size_h else 0
+            crop_x = int((resize_size_w - EI_CLASSIFIER_INPUT_WIDTH) / 2)  # 0 when same
         elif (crop_direction_x == 'left'):
             crop_x = 0
         elif (crop_direction_x == 'right'):
-            crop_x = resize_size_w - EI_CLASSIFIER_INPUT_WIDTH
+            crop_x = resize_size_w - EI_CLASSIFIER_INPUT_WIDTH  # can't be negative b/c one size will match input and the other will be larger
         else:
             raise Exception('Invalid value for crop_direction_x, should be center, left or right')
 
@@ -108,9 +110,8 @@ class ImageImpulseRunner(ImpulseRunner):
         else:
             raise Exception('Invalid value for crop_direction_y, should be center, top or bottom')
 
-        crop_region = (crop_x, crop_y, EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT)
-
-        cropped = resized[crop_region[1]:crop_region[1]+crop_region[3], crop_region[0]:crop_region[0]+crop_region[2]]
+        cropped = resized[crop_y: crop_y + EI_CLASSIFIER_INPUT_HEIGHT,
+                          crop_x: crop_x + EI_CLASSIFIER_INPUT_WIDTH]
 
         if self.isGrayscale:
             cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
