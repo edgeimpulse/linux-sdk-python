@@ -3,3 +3,5 @@ dist
 edge_impulse_linux.egg-info
 build
 *.jpg
+.DS_Store
+.venv/
