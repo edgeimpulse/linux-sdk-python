@@ -1,13 +1,23 @@
 #!/usr/bin/env python
 
 import numpy as np
-import cv2
+opencv_installed = True
+
+try:
+    import cv2
+except ModuleNotFoundError as e: # can alternatively drop the boolean check for NameError exception when cv2 is called
+    opencv_installed = False
+
+
 from edge_impulse_linux.runner import ImpulseRunner
 import math
 import psutil
 
 class ImageImpulseRunner(ImpulseRunner):
     def __init__(self, model_path: str):
+        if not opencv_installed:  # can alternatively drop the boolean check for NameError exception when cv2 is called
+            raise Exception("OpenCV Not found. To use ImageImpulseRunner, ensure opencv-python>=4.5.1.48 is installed.")
+        
         super(ImageImpulseRunner, self).__init__(model_path)
         self.closed = True
         self.labels = []
@@ -16,9 +26,11 @@ class ImageImpulseRunner(ImpulseRunner):
         self.isGrayscale = False
 
     def init(self):
+
+
         model_info = super(ImageImpulseRunner, self).init()
-        width = model_info['model_parameters']['image_input_width'];
-        height = model_info['model_parameters']['image_input_height'];
+        width = model_info['model_parameters']['image_input_width']
+        height = model_info['model_parameters']['image_input_height']
 
         if width == 0 or height == 0:
             raise Exception('Model file "' + self._model_path + '" is not suitable for image recognition')
