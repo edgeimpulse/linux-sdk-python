@@ -31,14 +31,13 @@ class ImpulseRunner:
 
         self._debug = debug
         self._tempdir = tempfile.mkdtemp()
-        print("2 this is changing")
         socket_path = os.path.join(self._tempdir, "runner.sock")
         cmd = [self._model_path, socket_path]
         if debug:
             self._runner = subprocess.Popen(cmd)
         else:
             self._runner = subprocess.Popen(
-                [self._model_path, socket_path],
+                cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
