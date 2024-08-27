@@ -15,8 +15,8 @@ class ImageImpulseRunner(ImpulseRunner):
         self.videoCapture = cv2.VideoCapture()
         self.isGrayscale = False
 
-    def init(self):
-        model_info = super(ImageImpulseRunner, self).init()
+    def init(self, debug=False):
+        model_info = super(ImageImpulseRunner, self).init(debug)
         width = model_info['model_parameters']['image_input_width']
         height = model_info['model_parameters']['image_input_height']
 
