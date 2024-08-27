@@ -6,7 +6,6 @@ import time
 import signal
 import socket
 import json
-import sys
 
 
 def now():
@@ -111,7 +110,7 @@ class ImpulseRunner:
             elif braces_open > 0:
                 line = line + c
 
-            if not resp is None:
+            if resp is not None:
                 break
 
         if resp is None:
