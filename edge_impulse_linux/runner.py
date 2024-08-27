@@ -6,6 +6,7 @@ import time
 import signal
 import socket
 import json
+import sys
 
 def now():
     return round(time.time() * 1000)
@@ -18,7 +19,7 @@ class ImpulseRunner:
         self._client = None
         self._ix = 0
 
-    def init(self):
+    def init(self, debug=False):
         if (not os.path.exists(self._model_path)):
             raise Exception('Model file does not exist: ' + self._model_path)
 
@@ -26,13 +27,19 @@ class ImpulseRunner:
             raise Exception('Model file "' + self._model_path + '" is not executable')
 
         self._tempdir = tempfile.mkdtemp()
+        print('2 this is changing')
         socket_path = os.path.join(self._tempdir, 'runner.sock')
-        self._runner = subprocess.Popen([self._model_path, socket_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # self._runner = subprocess.Popen([self._model_path, socket_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self._runner = subprocess.Popen(
+            [self._model_path, socket_path],
+            # stdout=sys.stdout,  # Redirect subprocess stdout to Python stdout
+            # stderr=sys.stderr   # Redirect subprocess stderr to Python stderr
+        )
 
-        while not os.path.exists(socket_path) or not self._runner.poll() is None:
+        while not os.path.exists(socket_path) or self._runner.poll() is not None:
             time.sleep(0.1)
 
-        if not self._runner.poll() is None:
+        if self._runner.poll() is not None:
             raise Exception('Failed to start runner (' + str(self._runner.poll()) + ')')
 
         self._client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -56,7 +63,7 @@ class ImpulseRunner:
         return self.send_msg(msg)
 
     def classify(self, data):
-        msg = { "classify": data }
+        msg = { "classify": data, "debug": True }
         return self.send_msg(msg)
 
     def send_msg(self, msg):
