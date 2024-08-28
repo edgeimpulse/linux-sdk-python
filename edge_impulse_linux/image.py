@@ -14,6 +14,7 @@ class ImageImpulseRunner(ImpulseRunner):
         self.dim = (0, 0)
         self.videoCapture = cv2.VideoCapture()
         self.isGrayscale = False
+        self.resizeMode = ''
 
     def init(self, debug=False):
         model_info = super(ImageImpulseRunner, self).init(debug)
@@ -26,6 +27,7 @@ class ImageImpulseRunner(ImpulseRunner):
         self.dim = (width, height)
         self.labels = model_info['model_parameters']['labels']
         self.isGrayscale = model_info['model_parameters']['image_channel_count'] == 1
+        self.resizeMode = model_info['model_parameters']['image_resize_mode'] or 'not-reported'
         return model_info
 
     def __enter__(self):
@@ -130,9 +132,15 @@ class ImageImpulseRunner(ImpulseRunner):
 
         return features, cropped
 
-    def get_features_from_image_auto_studio_setings(self):
-        pass
-        # TODO
+    def get_features_from_image_auto_studio_setings(self, img):
+        if self.resizeMode == '':
+            raise Exception(
+                'Runner has not initialized, please call init() first')
+        if self.resizeMode == 'not-reported':
+            raise Exception(
+                'Model file "' + self._model_path + '" does not report the image resize mode\n'
+                'Please update the model file via edge-impulse-linux-runner --download')
+        return get_features_from_image_with_studio_mode(img, self.resizeMode, self.dim[0], self.dim[1], self.isGrayscale)
 
 
 def resize_with_letterbox(image, target_width, target_height):
