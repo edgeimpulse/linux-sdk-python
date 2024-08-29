@@ -5,3 +5,5 @@ build
 *.jpg
 .DS_Store
 .venv/
+.vscode
+*.eim

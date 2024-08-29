@@ -54,6 +54,8 @@ def main(argv):
     runner = ImpulseRunner(modelfile)
     try:
         model_info = runner.init()
+        # model_info = runner.init(debug=True) # to get debug print out
+
         print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
 
         res = runner.classify(features)

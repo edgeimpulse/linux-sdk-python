@@ -130,8 +130,8 @@ class AudioImpulseRunner(ImpulseRunner):
         self.window_size = 0
         self.labels = []
 
-    def init(self):
-        model_info = super(AudioImpulseRunner, self).init()
+    def init(self, debug=False):
+        model_info = super(AudioImpulseRunner, self).init(debug)
         if model_info['model_parameters']['frequency'] == 0:
             raise Exception('Model file "' + self._model_path + '" is not suitable for audio recognition')
 

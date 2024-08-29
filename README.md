@@ -27,6 +27,8 @@ This library lets you run machine learning models and collect sensor data on Lin
     ```
 
     For the computer vision examples you'll want `opencv-python>=4.5.1.48`
+    Note on macOS on apple silicon, you will need to use a later version,
+    4.10.0.84 tested and installs cleanly
 
 ## Collecting data
 

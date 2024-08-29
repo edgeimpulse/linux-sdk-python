@@ -39,6 +39,8 @@ def main(argv):
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
+            # model_info = runner.init(debug=True) # to get debug print out
+
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             labels = model_info['model_parameters']['labels']
 
@@ -51,7 +53,10 @@ def main(argv):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             # get_features_from_image also takes a crop direction arguments in case you don't have square images
-            features, cropped = runner.get_features_from_image(img)
+            # features, cropped = runner.get_features_from_image(img)
+
+            # this mode uses the same settings used in studio to crop and resize the input
+            features, cropped = runner.get_features_from_image_auto_studio_setings(img)
 
             res = runner.classify(features)
 
