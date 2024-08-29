@@ -3,7 +3,7 @@ import cv2
 from edge_impulse_linux.image import get_features_from_image_with_studio_mode
 
 
-def create_test_image(frame_buffer_rows, frame_buffer_cols):
+def create_test_image(frame_buffer_cols, frame_buffer_rows):
     # Create an empty image with 3 channels (RGB)
     image_rgb888_packed = np.zeros((frame_buffer_rows, frame_buffer_cols, 3), dtype=np.uint8)
 
@@ -25,7 +25,7 @@ def create_test_image(frame_buffer_rows, frame_buffer_cols):
 def demo_mode(mode):
     frame_buffer_rows = 480
     frame_buffer_cols = 640
-    test_image = create_test_image(frame_buffer_rows, frame_buffer_cols)
+    test_image = create_test_image(frame_buffer_cols, frame_buffer_rows)
 
     _, test_image = get_features_from_image_with_studio_mode(test_image, mode, 200,200, False)
 

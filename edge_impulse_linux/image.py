@@ -27,7 +27,7 @@ class ImageImpulseRunner(ImpulseRunner):
         self.dim = (width, height)
         self.labels = model_info['model_parameters']['labels']
         self.isGrayscale = model_info['model_parameters']['image_channel_count'] == 1
-        self.resizeMode = model_info['model_parameters']['image_resize_mode'] or 'not-reported'
+        self.resizeMode = model_info['model_parameters'].get('image_resize_mode', 'not-reported')
         return model_info
 
     def __enter__(self):
