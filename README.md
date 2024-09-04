@@ -67,6 +67,15 @@ Then you can start classifying realtime sensor data. We have examples for:
 
 ## Troubleshooting
 
+### Collecting print out from the model
+
+To display the logging messages (ie, you may be used to in other deployments), init the runner like so
+```
+# model_info = runner.init(debug=True) # to get debug print out
+```
+This will pipe stdout and stderr into the same of your own process
+
+
 ### [Errno -9986] Internal PortAudio error (macOS)
 
 If you see this error you can re-install portaudio via:
