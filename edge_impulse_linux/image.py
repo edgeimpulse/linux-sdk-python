@@ -117,19 +117,20 @@ class ImageImpulseRunner(ImpulseRunner):
 
         if self.isGrayscale:
             cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-            pixels = np.array(cropped).flatten().tolist()
+            pixels = np.array(cropped).flatten().astype(np.uint32)
+            
+            features.extend((pixels << 16) + (pixels << 8) + pixels)
 
-            for p in pixels:
-                features.append((p << 16) + (p << 8) + p)
         else:
-            pixels = np.array(cropped).flatten().tolist()
+            pixels = np.array(cropped).reshape(-1, 3)
 
-            for ix in range(0, len(pixels), 3):
-                r = pixels[ix + 0]
-                g = pixels[ix + 1]
-                b = pixels[ix + 2]
-                features.append((r << 16) + (g << 8) + b)
+            r = pixels[:, 0].astype(np.uint32)
+            g = pixels[:, 1].astype(np.uint32)
+            b = pixels[:, 2].astype(np.uint32)
 
+            features = (r << 16) + (g << 8) + b
+
+        features=features.tolist()
         return features, cropped
 
     def get_features_from_image_auto_studio_setings(self, img):
@@ -219,19 +220,19 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
     else:
         raise ValueError(f"Unsupported mode: {mode}")
 
-    if is_grayscale:
-        resized_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-        pixels = np.array(resized_img).flatten().tolist()
+    if self.isGrayscale:
+            cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+            pixels = np.array(cropped).flatten().astype(np.uint32)
+            
+            features.extend((pixels << 16) + (pixels << 8) + pixels)
+    else:     
+        pixels = np.array(resized_img).reshape(-1, 3)
 
-        for p in pixels:
-            features.append((p << 16) + (p << 8) + p)
-    else:
-        pixels = np.array(resized_img).flatten().tolist()
+        r = pixels[:, 0].astype(np.uint32)
+        g = pixels[:, 1].astype(np.uint32)
+        b = pixels[:, 2].astype(np.uint32)
 
-        for ix in range(0, len(pixels), 3):
-            r = pixels[ix + 0]
-            g = pixels[ix + 1]
-            b = pixels[ix + 2]
-            features.append((r << 16) + (g << 8) + b)
+        features = (r << 16) + (g << 8) + b
 
+    features=features.tolist()
     return features, resized_img
