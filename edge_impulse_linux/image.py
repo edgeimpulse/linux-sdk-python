@@ -92,7 +92,7 @@ class ImageImpulseRunner(ImpulseRunner):
         # One dim will match the classifier size, the other will be larger
         resize_size = (resize_size_w, resize_size_h)
 
-        resized = cv2.resize(img, resize_size, interpolation=cv2.INTER_AREA)
+        resized = cv2.resize(img, resize_size, interpolation=cv2.INTER_NEAREST)
 
         if (crop_direction_x == 'center'):
             crop_x = int((resize_size_w - EI_CLASSIFIER_INPUT_WIDTH) / 2)  # 0 when same
@@ -211,11 +211,11 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
             offset = (in_frame_rows - new_height) // 2
             cropped_img = img[offset:offset + new_height, :]
 
-        resized_img = cv2.resize(cropped_img, (output_width, output_height), interpolation=cv2.INTER_AREA)
+        resized_img = cv2.resize(cropped_img, (output_width, output_height), interpolation=cv2.INTER_NEAREST)
     elif mode == 'fit-longest':
         resized_img = resize_with_letterbox(img, output_width, output_height)
     elif mode == 'squash':
-        resized_img = cv2.resize(img, (output_width, output_height), interpolation=cv2.INTER_AREA)
+        resized_img = cv2.resize(img, (output_width, output_height), interpolation=cv2.INTER_NEAREST)
     else:
         raise ValueError(f"Unsupported mode: {mode}")
 
