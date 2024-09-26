@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import device_patches       # Device specific patches for Jetson Nano (needs to be before importing cv2)
+import device_patches       # Device specific patches for Jetson Nano (needs to be before importing cv2)  # noqa: F401
 
 import cv2
 import os
-import sys, getopt
-import numpy as np
+import sys
+import getopt
 from edge_impulse_linux.image import ImageImpulseRunner
 
 runner = None
