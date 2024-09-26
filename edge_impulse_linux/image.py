@@ -153,6 +153,18 @@ class ImageImpulseRunner(ImpulseRunner):
         return get_features_from_image_with_studio_mode(img, self.resizeMode, self.dim[0], self.dim[1], self.isGrayscale)
 
 
+def resize_image(image, size):
+    """Resize an image to the given size using a common interpolation method.
+
+    Args:
+        image: The input image as a NumPy array.
+        size: A tuple (width, height) specifying the desired output size.
+
+    Returns:
+        The resized image as a NumPy array.
+    """
+    return cv2.resize(image, size, interpolation=cv2.INTER_AREA)
+
 def resize_with_letterbox(image, target_width, target_height):
     """Resize an image while maintaining aspect ratio using letterboxing.
 
@@ -180,7 +192,7 @@ def resize_with_letterbox(image, target_width, target_height):
     right_pad = target_width - new_width - left_pad
 
     # Resize image and add padding
-    resized_image = cv2.resize(image, (new_width, new_height))
+    resized_image = resize_image(image, (new_width, new_height))
     padded_image = cv2.copyMakeBorder(resized_image, top_pad, bottom_pad, left_pad, right_pad, cv2.BORDER_CONSTANT, value=0)
 
     return padded_image
@@ -225,7 +237,7 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
     elif mode == 'fit-longest':
         resized_img = resize_with_letterbox(img, output_width, output_height)
     elif mode == 'squash':
-        resized_img = cv2.resize(img, (output_width, output_height), interpolation=cv2.INTER_AREA)
+        resized_img = resize_image(img, (output_width, output_height))
     else:
         raise ValueError(f"Unsupported mode: {mode}")
 
