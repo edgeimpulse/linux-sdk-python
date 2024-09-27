@@ -81,7 +81,7 @@ class ImageImpulseRunner(ImpulseRunner):
                 res = self.classify(features)
                 yield res, cropped
 
-    # This expects images in RGB format (not BGR), DEPRECATED, use get_features_from_image_auto_studio_setings
+    # This expects images in RGB format (not BGR), DEPRECATED, use get_features_from_image_auto_studio_settings
     def get_features_from_image(self, img, crop_direction_x='center', crop_direction_y='center'):
         features = []
 
@@ -142,7 +142,7 @@ class ImageImpulseRunner(ImpulseRunner):
 
         return features, cropped
 
-    def get_features_from_image_auto_studio_setings(self, img):
+    def get_features_from_image_auto_studio_settings(self, img):
         if self.resizeMode == '':
             raise Exception(
                 'Runner has not initialized, please call init() first')

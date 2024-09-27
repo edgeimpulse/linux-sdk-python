@@ -56,7 +56,7 @@ def main(argv):
             # features, cropped = runner.get_features_from_image(img)
 
             # this mode uses the same settings used in studio to crop and resize the input
-            features, cropped = runner.get_features_from_image_auto_studio_setings(img)
+            features, cropped = runner.get_features_from_image_auto_studio_settings(img)
 
             res = runner.classify(features)
 
