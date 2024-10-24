@@ -87,9 +87,14 @@ class ImpulseRunner:
 
         t_sent_msg = now()
 
-        # i'm not sure if this is right, we should switch to async i/o for this like in Node
-        # I think that would perform better
-        data = self._client.recv(1 * 1024 * 1024)
+        data = b""
+        while True:
+            chunk = self._client.recv(1024)
+            # end chunk has \x00 in the end
+            if chunk[-1] == 0:
+                data = data + chunk[:-1]
+                break
+            data = data + chunk
 
         t_received_msg = now()
 
