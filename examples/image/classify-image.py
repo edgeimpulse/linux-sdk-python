@@ -39,6 +39,8 @@ def main(argv):
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
+            # model_info = runner.init(debug=True) # to get debug print out
+
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             labels = model_info['model_parameters']['labels']
 
@@ -51,7 +53,10 @@ def main(argv):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             # get_features_from_image also takes a crop direction arguments in case you don't have square images
-            features, cropped = runner.get_features_from_image(img)
+            # features, cropped = runner.get_features_from_image(img)
+
+            # this mode uses the same settings used in studio to crop and resize the input
+            features, cropped = runner.get_features_from_image_auto_studio_setings(img)
 
             res = runner.classify(features)
 
@@ -67,6 +72,12 @@ def main(argv):
                 for bb in res["result"]["bounding_boxes"]:
                     print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
                     cropped = cv2.rectangle(cropped, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
+
+            if "visual_anomaly_grid" in res["result"].keys():
+                print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] + res['timing']['classification']))
+                for grid_cell in res["result"]["visual_anomaly_grid"]:
+                    print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (grid_cell['label'], grid_cell['value'], grid_cell['x'], grid_cell['y'], grid_cell['width'], grid_cell['height']))
+                    cropped = cv2.rectangle(cropped, (grid_cell['x'], grid_cell['y']), (grid_cell['x'] + grid_cell['width'], grid_cell['y'] + grid_cell['height']), (255, 125, 0), 1)
 
             # the image will be resized and cropped, save a copy of the picture here
             # so you can see what's being passed into the classifier

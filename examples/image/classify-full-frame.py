@@ -67,6 +67,8 @@ def main(argv):
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
+            # model_info = runner.init(debug=True) # to get debug print out
+
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             labels = model_info['model_parameters']['labels']
             if len(args)>= 2:
@@ -118,6 +120,11 @@ def main(argv):
                         print('%s: Found %d bounding boxes (%d ms.)' % (tag, len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                         for bb in res["result"]["bounding_boxes"]:
                             print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
+
+                    if "visual_anomaly_grid" in res["result"].keys():
+                        print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] + res['timing']['classification']))
+                        for grid_cell in res["result"]["visual_anomaly_grid"]:
+                            print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (grid_cell['label'], grid_cell['value'], grid_cell['x'], grid_cell['y'], grid_cell['width'], grid_cell['height']))
 
                 print_classification(res_l, 'LEFT')
                 print_classification(res_r, 'RIGHT')

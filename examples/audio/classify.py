@@ -41,6 +41,7 @@ def main(argv):
     with AudioImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
+            # model_info = runner.init(debug=True) # to get debug print out
             labels = model_info['model_parameters']['labels']
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
 

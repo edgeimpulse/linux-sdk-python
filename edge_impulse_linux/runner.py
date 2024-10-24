@@ -7,8 +7,10 @@ import signal
 import socket
 import json
 
+
 def now():
     return round(time.time() * 1000)
+
 
 class ImpulseRunner:
     def __init__(self, model_path: str):
@@ -17,23 +19,33 @@ class ImpulseRunner:
         self._runner = None
         self._client = None
         self._ix = 0
+        self._debug = False
 
-    def init(self):
-        if (not os.path.exists(self._model_path)):
-            raise Exception('Model file does not exist: ' + self._model_path)
+    def init(self, debug=False):
+        if not os.path.exists(self._model_path):
+            raise Exception("Model file does not exist: " + self._model_path)
 
-        if (not os.access(self._model_path, os.X_OK)):
+        if not os.access(self._model_path, os.X_OK):
             raise Exception('Model file "' + self._model_path + '" is not executable')
 
+        self._debug = debug
         self._tempdir = tempfile.mkdtemp()
-        socket_path = os.path.join(self._tempdir, 'runner.sock')
-        self._runner = subprocess.Popen([self._model_path, socket_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        socket_path = os.path.join(self._tempdir, "runner.sock")
+        cmd = [self._model_path, socket_path]
+        if debug:
+            self._runner = subprocess.Popen(cmd)
+        else:
+            self._runner = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
 
-        while not os.path.exists(socket_path) or not self._runner.poll() is None:
+        while not os.path.exists(socket_path) or self._runner.poll() is not None:
             time.sleep(0.1)
 
-        if not self._runner.poll() is None:
-            raise Exception('Failed to start runner (' + str(self._runner.poll()) + ')')
+        if self._runner.poll() is not None:
+            raise Exception("Failed to start runner (" + str(self._runner.poll()) + ")")
 
         self._client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._client.connect(socket_path)
@@ -41,35 +53,37 @@ class ImpulseRunner:
         return self.hello()
 
     def stop(self):
-        if (self._tempdir):
+        if self._tempdir:
             shutil.rmtree(self._tempdir)
 
-        if (self._client):
+        if self._client:
             self._client.close()
 
-        if (self._runner):
+        if self._runner:
             os.kill(self._runner.pid, signal.SIGINT)
             # todo: in Node we send a SIGHUP after 0.5sec if process has not died, can we do this somehow here too?
 
     def hello(self):
-        msg = { "hello": 1 }
+        msg = {"hello": 1}
         return self.send_msg(msg)
 
     def classify(self, data):
-        msg = { "classify": data }
+        msg = {"classify": data}
+        if self._debug:
+            msg["debug"] = True
         return self.send_msg(msg)
 
     def send_msg(self, msg):
         t_send_msg = now()
 
         if not self._client:
-            raise Exception('ImpulseRunner is not initialized')
+            raise Exception("ImpulseRunner is not initialized (call init())")
 
         self._ix = self._ix + 1
         ix = self._ix
 
         msg["id"] = ix
-        self._client.send(json.dumps(msg).encode('utf-8'))
+        self._client.send(json.dumps(msg).encode("utf-8"))
 
         t_sent_msg = now()
 
@@ -81,29 +95,29 @@ class ImpulseRunner:
 
         braces_open = 0
         braces_closed = 0
-        line = ''
+        line = ""
         resp = None
 
-        for c in data.decode('utf-8'):
-            if c == '{':
+        for c in data.decode("utf-8"):
+            if c == "{":
                 line = line + c
                 braces_open = braces_open + 1
-            elif c == '}':
+            elif c == "}":
                 line = line + c
                 braces_closed = braces_closed + 1
-                if (braces_closed == braces_open):
+                if braces_closed == braces_open:
                     resp = json.loads(line)
             elif braces_open > 0:
                 line = line + c
 
-            if (not resp is None):
+            if resp is not None:
                 break
 
-        if (resp is None):
-            raise Exception('No data or corrupted data received')
+        if resp is None:
+            raise Exception("No data or corrupted data received")
 
-        if (resp["id"] != ix):
-            raise Exception('Wrong id, expected: ' + str(ix) + ' but got ' + resp["id"])
+        if resp["id"] != ix:
+            raise Exception("Wrong id, expected: " + str(ix) + " but got " + resp["id"])
 
         if not resp["success"]:
             raise Exception(resp["error"])
