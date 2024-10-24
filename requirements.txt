@@ -2,3 +2,4 @@ numpy>=1.19
 PyAudio==0.2.11
 psutil>=5.8.0
 edge_impulse_linux
+six==1.16.0
