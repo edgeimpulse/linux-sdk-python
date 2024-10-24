@@ -102,7 +102,7 @@ class ImageImpulseRunner(ImpulseRunner):
         # One dim will match the classifier size, the other will be larger
         resize_size = (resize_size_w, resize_size_h)
 
-        resized = cv2.resize(img, resize_size, interpolation=cv2.INTER_AREA)
+        resized = cv2.resize(img, resize_size, interpolation=cv2.INTER_NEAREST)
 
         if (crop_direction_x == 'center'):
             crop_x = int((resize_size_w - EI_CLASSIFIER_INPUT_WIDTH) / 2)  # 0 when same
@@ -127,19 +127,20 @@ class ImageImpulseRunner(ImpulseRunner):
 
         if self.isGrayscale:
             cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-            pixels = np.array(cropped).flatten().tolist()
+            pixels = np.array(cropped).flatten().astype(np.uint32)
+            
+            features.extend((pixels << 16) + (pixels << 8) + pixels)
 
-            for p in pixels:
-                features.append((p << 16) + (p << 8) + p)
         else:
-            pixels = np.array(cropped).flatten().tolist()
+            pixels = np.array(cropped).reshape(-1, 3)
 
-            for ix in range(0, len(pixels), 3):
-                r = pixels[ix + 0]
-                g = pixels[ix + 1]
-                b = pixels[ix + 2]
-                features.append((r << 16) + (g << 8) + b)
+            r = pixels[:, 0].astype(np.uint32)
+            g = pixels[:, 1].astype(np.uint32)
+            b = pixels[:, 2].astype(np.uint32)
 
+            features = (r << 16) + (g << 8) + b
+
+        features=features.tolist()
         return features, cropped
 
     def get_features_from_image_auto_studio_setings(self, img):
@@ -221,27 +222,27 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
             offset = (in_frame_rows - new_height) // 2
             cropped_img = img[offset:offset + new_height, :]
 
-        resized_img = cv2.resize(cropped_img, (output_width, output_height), interpolation=cv2.INTER_AREA)
+        resized_img = cv2.resize(cropped_img, (output_width, output_height), interpolation=cv2.INTER_NEAREST)
     elif mode == 'fit-longest':
         resized_img = resize_with_letterbox(img, output_width, output_height)
     elif mode == 'squash':
-        resized_img = cv2.resize(img, (output_width, output_height), interpolation=cv2.INTER_AREA)
+        resized_img = cv2.resize(img, (output_width, output_height), interpolation=cv2.INTER_NEAREST)
     else:
         raise ValueError(f"Unsupported mode: {mode}")
 
-    if is_grayscale:
-        resized_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-        pixels = np.array(resized_img).flatten().tolist()
+    if self.isGrayscale:
+            cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+            pixels = np.array(cropped).flatten().astype(np.uint32)
+            
+            features.extend((pixels << 16) + (pixels << 8) + pixels)
+    else:     
+        pixels = np.array(resized_img).reshape(-1, 3)
 
-        for p in pixels:
-            features.append((p << 16) + (p << 8) + p)
-    else:
-        pixels = np.array(resized_img).flatten().tolist()
+        r = pixels[:, 0].astype(np.uint32)
+        g = pixels[:, 1].astype(np.uint32)
+        b = pixels[:, 2].astype(np.uint32)
 
-        for ix in range(0, len(pixels), 3):
-            r = pixels[ix + 0]
-            g = pixels[ix + 1]
-            b = pixels[ix + 2]
-            features.append((r << 16) + (g << 8) + b)
+        features = (r << 16) + (g << 8) + b
 
+    features=features.tolist()
     return features, resized_img
