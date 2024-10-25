@@ -220,7 +220,7 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
     else:
         raise ValueError(f"Unsupported mode: {mode}")
 
-    if self.isGrayscale:
+    if is_grayscale:
             cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
             pixels = np.array(cropped).flatten().astype(np.uint32)
             
