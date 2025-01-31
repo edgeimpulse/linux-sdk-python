@@ -29,7 +29,7 @@ This library lets you run machine learning models and collect sensor data on Lin
 4. Install pip dependencies:
 
     ```
-    pip3 install -r requirements.txt
+    $ pip3 install -r requirements.txt
     ```
 
     For the computer vision examples you'll want `opencv-python>=4.5.1.48`
