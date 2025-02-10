@@ -122,7 +122,9 @@ def main(argv):
                             print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
 
                     if "visual_anomaly_grid" in res["result"].keys():
-                        print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] + res['timing']['classification']))
+                        print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] +
+                                                                                                                 res['timing']['classification'] +
+                                                                                                                 res['timing']['anomaly']))
                         for grid_cell in res["result"]["visual_anomaly_grid"]:
                             print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (grid_cell['label'], grid_cell['value'], grid_cell['x'], grid_cell['y'], grid_cell['width'], grid_cell['height']))
 
