@@ -1,0 +1,43 @@
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install build tools
+        env:
+          SB_API_KEY: ${{ secrets.SB_API_KEY }}
+        run: |
+          export PYPI_REGISTRY=https://$SB_API_KEY.pypimirror.stablebuild.com/2023-12-27/
+          curl https://$SB_API_KEY.httpcache.stablebuild.com/pip-cache-20231228/https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+            python get-pip.py -i $PYPI_REGISTRY "pip==21.3.1" && \
+            rm get-pip.py
+          python -m pip install -i https://$SB_API_KEY.pypimirror.stablebuild.com/2023-01-30/ twine
+
+      - name: Build package
+          rm -rf build/
+          rm -rf dist/
+          python setup.py sdist
+
+      - name: Publish package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m twine upload dist/*
