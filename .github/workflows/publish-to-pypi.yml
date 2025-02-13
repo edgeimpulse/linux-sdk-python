@@ -30,6 +30,7 @@ jobs:
           python -m pip install -i https://$SB_API_KEY.pypimirror.stablebuild.com/2023-01-30/ twine
 
       - name: Build package
+        run: |
           rm -rf build/
           rm -rf dist/
           python setup.py sdist
