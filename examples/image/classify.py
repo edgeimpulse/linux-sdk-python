@@ -109,7 +109,6 @@ def main(argv):
                         score = res['result']['classification'][label]
                         print('%s: %.2f\t' % (label, score), end='')
                     print('', flush=True)
-
                 elif "bounding_boxes" in res["result"].keys():
                     print('Found %d bounding boxes (%d ms.)' % (len(res["result"]["bounding_boxes"]), res['timing']['dsp'] + res['timing']['classification']))
                     for bb in res["result"]["bounding_boxes"]:
