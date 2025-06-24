@@ -92,6 +92,25 @@ def main(argv):
                         print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
                         img = cv2.rectangle(cropped, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
+                # Object tracking output
+                if "object_tracking" in res["result"].keys():
+                    print('Found %d tracked objects' % (len(res["result"]["object_tracking"])))
+                    for obj in res["result"]["object_tracking"]:
+                        print('\tID=%s, label=%s, value=%.2f, x=%d, y=%d, w=%d, h=%d' % (
+                            obj['object_id'], obj['label'], obj['value'], obj['x'], obj['y'], obj['width'], obj['height']))
+                        # Draw bounding box
+                        x = obj['x']
+                        y = obj['y']
+                        w = obj['width']
+                        h = obj['height']
+                        img = cv2.rectangle(cropped, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        # Draw label and ID
+                        label_id_text = f"ID={obj['object_id']}, {obj['label']}"
+                        text_x = x
+                        text_y = y - 10 if y - 10 > 10 else y + 20
+                        img = cv2.putText(img, label_id_text, (text_x, text_y),
+                                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
                 if "visual_anomaly_grid" in res["result"].keys():
                     print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] +
                                                                                                                 res['timing']['classification'] +
