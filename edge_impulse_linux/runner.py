@@ -113,6 +113,13 @@ class ImpulseRunner:
         send_resp = self.send_msg(msg)
         return send_resp
 
+    def set_threshold(self, obj):
+        if not 'id' in obj:
+            raise Exception('set_threshold requires an object with an "id" field')
+
+        msg = { 'set_threshold': obj }
+        return self.send_msg(msg)
+
     def send_msg(self, msg):
         t_send_msg = now()
 
