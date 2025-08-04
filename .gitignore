@@ -8,3 +8,4 @@ build
 .vscode
 *.eim
 .act-secrets
+*.png

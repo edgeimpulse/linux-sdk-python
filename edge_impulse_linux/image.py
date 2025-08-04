@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 import numpy as np
-import cv2
+try:
+    import cv2
+except ImportError:
+    print('Missing OpenCV, install via `pip3 install "opencv-python>=4.5.1.48,<5"`')
+    exit(1)
+
 from edge_impulse_linux.runner import ImpulseRunner
 import math
-import psutil
 
 class ImageImpulseRunner(ImpulseRunner):
     def __init__(self, model_path: str):
@@ -44,7 +48,7 @@ class ImageImpulseRunner(ImpulseRunner):
 
     # This returns images in RGB format (not BGR)
     def get_frames(self, videoDeviceId = 0):
-        if psutil.OSX or psutil.MACOS:
+        if sys.platform == "darwin":
             print('Make sure to grant the this script access to your webcam.')
             print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
 
@@ -57,7 +61,7 @@ class ImageImpulseRunner(ImpulseRunner):
 
     # This returns images in RGB format (not BGR)
     def classifier(self, videoDeviceId = 0):
-        if psutil.OSX or psutil.MACOS:
+        if sys.platform == "darwin":
             print('Make sure to grant the this script access to your webcam.')
             print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
 

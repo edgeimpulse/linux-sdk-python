@@ -2,7 +2,11 @@
 
 import device_patches       # Device specific patches for Jetson Nano (needs to be before importing cv2)
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    print('Missing OpenCV, install via `pip3 install "opencv-python>=4.5.1.48,<5"`')
+    exit(1)
 import os
 import sys, getopt
 import signal
