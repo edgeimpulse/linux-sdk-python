@@ -141,9 +141,7 @@ class ImageImpulseRunner(ImpulseRunner):
             raise Exception(
                 'Runner has not initialized, please call init() first')
         if self.resizeMode == 'not-reported':
-            raise Exception(
-                'Model file "' + self._model_path + '" does not report the image resize mode\n'
-                'Please update the model file via edge-impulse-linux-runner --download')
+            self.resizeMode = 'squash'
         return get_features_from_image_with_studio_mode(img, self.resizeMode, self.dim[0], self.dim[1], self.isGrayscale)
 
 

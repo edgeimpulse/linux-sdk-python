@@ -96,8 +96,6 @@ class ImpulseRunner:
         return self.send_msg(msg)
 
     def classify(self, data):
-        start = now()
-
         if self._shm:
             self._shm['array'][:] = data
 
@@ -111,11 +109,8 @@ class ImpulseRunner:
 
         if self._debug:
             msg["debug"] = True
+
         send_resp = self.send_msg(msg)
-        end = now()
-
-        print('send_resp', str(end - start) + 'ms.')
-
         return send_resp
 
     def send_msg(self, msg):
