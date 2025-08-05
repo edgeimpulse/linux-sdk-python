@@ -43,7 +43,6 @@ def main(argv):
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
-            print('model_info', model_info)
             # model_info = runner.init(debug=True) # to get debug print out
 
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
