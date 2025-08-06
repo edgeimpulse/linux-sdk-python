@@ -57,8 +57,7 @@ class ImpulseRunner:
         if ('features_shm' in hello_resp.keys()):
             shm_name = hello_resp['features_shm']['name']
             # python does not want the leading slash
-            if (shm_name.startswith('/')):
-                shm_name = shm_name[1:]
+            shm_name = shm_name.lstrip('/')
             shm = shared_memory.SharedMemory(name=shm_name)
             self._shm = {
                 'shm': shm,
