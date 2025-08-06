@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import sys
 try:
     import cv2
 except ImportError:
