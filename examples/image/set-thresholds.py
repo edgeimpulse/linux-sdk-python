@@ -69,10 +69,32 @@ def main(argv):
             # this mode uses the same settings used in studio to crop and resize the input
             features, cropped = runner.get_features_from_image_auto_studio_settings(img)
 
+            print("Which threshold would you like to change? (id)")
+            while True:
+                try:
+                    threshold_id = int(input('Enter threshold ID: '))
+                    if threshold_id not in [t['id'] for t in model_info['model_parameters']['thresholds']]:
+                        print('Invalid threshold ID, try again')
+                        continue
+                    break
+                except ValueError:
+                    print('Invalid input, please enter a number')
+
+            print("Enter a new threshold value (between 0.0 and 1.0):")
+            while True:
+                try:
+                    new_threshold = float(input('New threshold value: '))
+                    if new_threshold < 0.0 or new_threshold > 1.0:
+                        print('Invalid threshold value, must be between 0.0 and 1.0')
+                        continue
+                    break
+                except ValueError:
+                    print('Invalid input, please enter a number')
+
             # dynamically override the thresold from 0.2 -> 0.8
             runner.set_threshold({
-                'id': 3,
-                'min_score': 0.8,
+                'id': threshold_id,
+                'min_score': new_threshold,
             })
 
             res = runner.classify(features)
