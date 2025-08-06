@@ -236,17 +236,10 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
 
     if is_grayscale:
         resized_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-        pixels = np.array(resized_img).flatten().tolist()
-
-        for p in pixels:
-            features.append((p << 16) + (p << 8) + p)
+        features = (resized_img.astype(np.uint32) * 0x010101).flatten().tolist()
     else:
-        pixels = np.array(resized_img).flatten().tolist()
-
-        for ix in range(0, len(pixels), 3):
-            r = pixels[ix + 0]
-            g = pixels[ix + 1]
-            b = pixels[ix + 2]
-            features.append((r << 16) + (g << 8) + b)
+        # Use numpy's vectorized operations for RGB feature encoding
+        pixels = resized_img.astype(np.uint32)
+        features = ((pixels[..., 0] << 16) | (pixels[..., 1] << 8) | pixels[..., 2]).flatten().tolist()
 
     return features, resized_img
