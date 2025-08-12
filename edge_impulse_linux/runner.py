@@ -6,11 +6,11 @@ import time
 import signal
 import socket
 import json
-
+from multiprocessing import shared_memory, resource_tracker
+import numpy as np
 
 def now():
     return round(time.time() * 1000)
-
 
 class ImpulseRunner:
     def __init__(self, model_path: str):
@@ -20,6 +20,8 @@ class ImpulseRunner:
         self._client = None
         self._ix = 0
         self._debug = False
+        self._hello_resp = None
+        self._shm = None
 
     def init(self, debug=False):
         if not os.path.exists(self._model_path):
@@ -50,27 +52,71 @@ class ImpulseRunner:
         self._client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._client.connect(socket_path)
 
-        return self.hello()
+        hello_resp = self._hello_resp = self.hello()
+
+        if ('features_shm' in hello_resp.keys()):
+            shm_name = hello_resp['features_shm']['name']
+            # python does not want the leading slash
+            shm_name = shm_name.lstrip('/')
+            shm = shared_memory.SharedMemory(name=shm_name)
+            self._shm = {
+                'shm': shm,
+                'type': hello_resp['features_shm']['type'],
+                'elements': hello_resp['features_shm']['elements'],
+                'array': np.ndarray((hello_resp['features_shm']['elements'],), dtype=np.float32, buffer=shm.buf)
+            }
+
+        return self._hello_resp
+
+    def __del__(self):
+        self.stop()
 
     def stop(self):
-        if self._tempdir:
+        if self._tempdir is not None:
             shutil.rmtree(self._tempdir)
+            self._tempdir = None
 
-        if self._client:
+        if self._client is not None:
             self._client.close()
+            self._client = None
 
-        if self._runner:
+        if self._runner is not None:
             os.kill(self._runner.pid, signal.SIGINT)
             # todo: in Node we send a SIGHUP after 0.5sec if process has not died, can we do this somehow here too?
+            self._runner = None
+
+        if self._shm is not None:
+            self._shm['shm'].close()
+            resource_tracker.unregister(self._shm['shm']._name, "shared_memory")
+            self._shm = None
 
     def hello(self):
         msg = {"hello": 1}
         return self.send_msg(msg)
 
     def classify(self, data):
-        msg = {"classify": data}
+        if self._shm:
+            self._shm['array'][:] = data
+
+            msg = {
+                "classify_shm": {
+                    "elements": len(data),
+                }
+            }
+        else:
+            msg = {"classify": data}
+
         if self._debug:
             msg["debug"] = True
+
+        send_resp = self.send_msg(msg)
+        return send_resp
+
+    def set_threshold(self, obj):
+        if not 'id' in obj:
+            raise Exception('set_threshold requires an object with an "id" field')
+
+        msg = { 'set_threshold': obj }
         return self.send_msg(msg)
 
     def send_msg(self, msg):

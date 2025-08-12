@@ -1,5 +1,9 @@
 import numpy as np
-import cv2
+try:
+    import cv2
+except ImportError:
+    print('Missing OpenCV, install via `pip3 install "opencv-python>=4.5.1.48,<5"`')
+    exit(1)
 from edge_impulse_linux.image import get_features_from_image_with_studio_mode
 
 

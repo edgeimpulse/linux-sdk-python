@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 import numpy as np
-import cv2
+import sys
+try:
+    import cv2
+except ImportError:
+    print('Missing OpenCV, install via `pip3 install "opencv-python>=4.5.1.48,<5"`')
+    exit(1)
+
 from edge_impulse_linux.runner import ImpulseRunner
 import math
-import psutil
 
 class ImageImpulseRunner(ImpulseRunner):
     def __init__(self, model_path: str):
@@ -44,7 +49,7 @@ class ImageImpulseRunner(ImpulseRunner):
 
     # This returns images in RGB format (not BGR)
     def get_frames(self, videoDeviceId = 0):
-        if psutil.OSX or psutil.MACOS:
+        if sys.platform == "darwin":
             print('Make sure to grant the this script access to your webcam.')
             print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
 
@@ -57,7 +62,7 @@ class ImageImpulseRunner(ImpulseRunner):
 
     # This returns images in RGB format (not BGR)
     def classifier(self, videoDeviceId = 0):
-        if psutil.OSX or psutil.MACOS:
+        if sys.platform == "darwin":
             print('Make sure to grant the this script access to your webcam.')
             print('If your webcam is not responding, try running "tccutil reset Camera" to reset the camera access privileges.')
 
@@ -137,9 +142,7 @@ class ImageImpulseRunner(ImpulseRunner):
             raise Exception(
                 'Runner has not initialized, please call init() first')
         if self.resizeMode == 'not-reported':
-            raise Exception(
-                'Model file "' + self._model_path + '" does not report the image resize mode\n'
-                'Please update the model file via edge-impulse-linux-runner --download')
+            self.resizeMode = 'squash'
         return get_features_from_image_with_studio_mode(img, self.resizeMode, self.dim[0], self.dim[1], self.isGrayscale)
 
 
@@ -233,17 +236,10 @@ def get_features_from_image_with_studio_mode(img, mode, output_width, output_hei
 
     if is_grayscale:
         resized_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-        pixels = np.array(resized_img).flatten().tolist()
-
-        for p in pixels:
-            features.append((p << 16) + (p << 8) + p)
+        features = (resized_img.astype(np.uint32) * 0x010101).flatten().tolist()
     else:
-        pixels = np.array(resized_img).flatten().tolist()
-
-        for ix in range(0, len(pixels), 3):
-            r = pixels[ix + 0]
-            g = pixels[ix + 1]
-            b = pixels[ix + 2]
-            features.append((r << 16) + (g << 8) + b)
+        # Use numpy's vectorized operations for RGB feature encoding
+        pixels = resized_img.astype(np.uint32)
+        features = ((pixels[..., 0] << 16) | (pixels[..., 1] << 8) | pixels[..., 2]).flatten().tolist()
 
     return features, resized_img
