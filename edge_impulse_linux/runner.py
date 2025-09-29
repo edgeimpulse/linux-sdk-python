@@ -39,8 +39,8 @@ class ImpulseRunner:
         else:
             self._runner = subprocess.Popen(
                 cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
 
         while not os.path.exists(socket_path) or self._runner.poll() is not None:
