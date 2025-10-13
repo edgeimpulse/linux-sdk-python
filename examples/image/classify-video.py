@@ -95,6 +95,11 @@ def main(argv):
                         print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
                         img = cv2.rectangle(cropped, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
+                elif "freeform" in res['result'].keys():
+                    print('Result (%d ms.)' % (res['timing']['dsp'] + res['timing']['classification']))
+                    for i in range(0, len(res['result']['freeform'])):
+                        print(f'    Freeform output {i}:', ", ".join(f"{x:.4f}" for x in res['result']['freeform'][i]))
+
                 # Object tracking output
                 if "object_tracking" in res["result"].keys():
                     print('Found %d tracked objects' % (len(res["result"]["object_tracking"])))

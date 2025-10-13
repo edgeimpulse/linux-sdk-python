@@ -77,6 +77,11 @@ def main(argv):
                     print('\t%s (%.2f): x=%d y=%d w=%d h=%d' % (bb['label'], bb['value'], bb['x'], bb['y'], bb['width'], bb['height']))
                     cropped = cv2.rectangle(cropped, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
 
+            elif "freeform" in res['result'].keys():
+                print('Result (%d ms.)' % (res['timing']['dsp'] + res['timing']['classification']))
+                for i in range(0, len(res['result']['freeform'])):
+                    print(f'    Freeform output {i}:', ", ".join(f"{x:.4f}" for x in res['result']['freeform'][i]))
+
             if "visual_anomaly_grid" in res["result"].keys():
                 print('Found %d visual anomalies (%d ms.)' % (len(res["result"]["visual_anomaly_grid"]), res['timing']['dsp'] +
                                                                                                             res['timing']['classification'] +

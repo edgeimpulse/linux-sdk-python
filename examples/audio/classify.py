@@ -52,11 +52,19 @@ def main(argv):
                 print("Device ID "+ str(selected_device_id) + " has been provided as an argument.")
 
             for res, audio in runner.classifier(device_id=selected_device_id):
-                print('Result (%d ms.) ' % (res['timing']['dsp'] + res['timing']['classification']), end='')
-                for label in labels:
-                    score = res['result']['classification'][label]
-                    print('%s: %.2f\t' % (label, score), end='')
-                print('', flush=True)
+                if "classification" in res["result"].keys():
+                    print('Result (%d ms.) ' % (res['timing']['dsp'] + res['timing']['classification']), end='')
+                    for label in labels:
+                        score = res['result']['classification'][label]
+                        print('%s: %.2f\t' % (label, score), end='')
+                    print('', flush=True)
+                elif "freeform" in res['result'].keys():
+                    print('Result (%d ms.)' % (res['timing']['dsp'] + res['timing']['classification']))
+                    for i in range(0, len(res['result']['freeform'])):
+                        print(f'    Freeform output {i}:', ", ".join(f"{x:.4f}" for x in res['result']['freeform'][i]))
+                else:
+                    print('Result (%d ms.)' % (res['timing']['dsp'] + res['timing']['classification']))
+                    print(res['result'])
 
         finally:
             if (runner):
