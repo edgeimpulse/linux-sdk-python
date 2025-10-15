@@ -44,7 +44,7 @@ def main(argv):
     with ImageImpulseRunner(modelfile) as runner:
         try:
             model_info = runner.init()
-            # model_info = runner.init(debug=True) # to get debug print out
+            # model_info = runner.init(debug=True, timeout=60) # to get debug print out and set longer timeout
 
             print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
             if not 'thresholds' in model_info['model_parameters']:

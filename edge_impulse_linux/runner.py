@@ -13,7 +13,7 @@ def now():
     return round(time.time() * 1000)
 
 class ImpulseRunner:
-    def __init__(self, model_path: str, allow_shm=True):
+    def __init__(self, model_path: str, timeout: int = 30, allow_shm = True):
         self._model_path = model_path
         self._tempdir = None
         self._runner = None
@@ -24,6 +24,7 @@ class ImpulseRunner:
         self._allow_shm = allow_shm
         self._input_shm = None
         self._freeform_output_shm = []
+        self._timeout = timeout
 
     def init(self, debug=False):
         if not os.path.exists(self._model_path):
@@ -41,8 +42,8 @@ class ImpulseRunner:
         else:
             self._runner = subprocess.Popen(
                 cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
 
         while not os.path.exists(socket_path) or self._runner.poll() is not None:
@@ -52,6 +53,8 @@ class ImpulseRunner:
             raise Exception("Failed to start runner (" + str(self._runner.poll()) + ")")
 
         self._client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        # timeout the IPC connection in case the EIM hangs
+        self._client.settimeout(self._timeout)
         self._client.connect(socket_path)
 
         hello_resp = self._hello_resp = self.hello()
