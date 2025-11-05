@@ -54,7 +54,7 @@ def main(argv):
     runner = ImpulseRunner(modelfile)
     try:
         model_info = runner.init()
-        # model_info = runner.init(debug=True, timeout=10) # to get debug print out and set longer timeout
+        # model_info = runner.init(debug=True, timeout=60) # to get debug print out and set longer timeout
 
         print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
 

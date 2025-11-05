@@ -13,7 +13,7 @@ def now():
     return round(time.time() * 1000)
 
 class ImpulseRunner:
-    def __init__(self, model_path: str, timeout: int = 5):
+    def __init__(self, model_path: str, timeout: int = 30, allow_shm = True):
         self._model_path = model_path
         self._tempdir = None
         self._runner = None
@@ -21,7 +21,9 @@ class ImpulseRunner:
         self._ix = 0
         self._debug = False
         self._hello_resp = None
-        self._shm = None
+        self._allow_shm = allow_shm
+        self._input_shm = None
+        self._freeform_output_shm = []
         self._timeout = timeout
 
     def init(self, debug=False):
@@ -57,17 +59,32 @@ class ImpulseRunner:
 
         hello_resp = self._hello_resp = self.hello()
 
-        if ('features_shm' in hello_resp.keys()):
-            shm_name = hello_resp['features_shm']['name']
-            # python does not want the leading slash
-            shm_name = shm_name.lstrip('/')
-            shm = shared_memory.SharedMemory(name=shm_name)
-            self._shm = {
-                'shm': shm,
-                'type': hello_resp['features_shm']['type'],
-                'elements': hello_resp['features_shm']['elements'],
-                'array': np.ndarray((hello_resp['features_shm']['elements'],), dtype=np.float32, buffer=shm.buf)
-            }
+        if self._allow_shm:
+            if ('features_shm' in hello_resp.keys()):
+                shm_name = hello_resp['features_shm']['name']
+                # python does not want the leading slash
+                shm_name = shm_name.lstrip('/')
+                shm = shared_memory.SharedMemory(name=shm_name)
+                self._input_shm = {
+                    'shm': shm,
+                    'type': hello_resp['features_shm']['type'],
+                    'elements': hello_resp['features_shm']['elements'],
+                    'array': np.ndarray((hello_resp['features_shm']['elements'],), dtype=np.float32, buffer=shm.buf)
+                }
+
+            if ('freeform_output_shm' in hello_resp.keys()):
+                for output_shm in hello_resp['freeform_output_shm']:
+                    shm_name = output_shm['name']
+                    # python does not want the leading slash
+                    shm_name = shm_name.lstrip('/')
+                    shm = shared_memory.SharedMemory(name=shm_name)
+                    self._freeform_output_shm.append({
+                        'index': output_shm['index'],
+                        'shm': shm,
+                        'type': output_shm['type'],
+                        'elements': output_shm['elements'],
+                        'array': np.ndarray((output_shm['elements'],), dtype=np.float32, buffer=shm.buf)
+                    })
 
         return self._hello_resp
 
@@ -88,18 +105,23 @@ class ImpulseRunner:
             # todo: in Node we send a SIGHUP after 0.5sec if process has not died, can we do this somehow here too?
             self._runner = None
 
-        if self._shm is not None:
-            self._shm['shm'].close()
-            resource_tracker.unregister(self._shm['shm']._name, "shared_memory")
-            self._shm = None
+        if self._input_shm is not None:
+            self._input_shm['shm'].close()
+            resource_tracker.unregister(self._input_shm['shm']._name, "shared_memory")
+            self._input_shm = None
+
+        for shm in self._freeform_output_shm:
+            shm['shm'].close()
+            resource_tracker.unregister(shm['shm']._name, "shared_memory")
+        self._freeform_output_shm = []
 
     def hello(self):
         msg = {"hello": 1}
         return self.send_msg(msg)
 
     def classify(self, data):
-        if self._shm:
-            self._shm['array'][:] = data
+        if self._input_shm:
+            self._input_shm['array'][:] = data
 
             msg = {
                 "classify_shm": {
@@ -113,6 +135,13 @@ class ImpulseRunner:
             msg["debug"] = True
 
         send_resp = self.send_msg(msg)
+
+        if 'result' in send_resp and 'freeform' in send_resp['result'] and send_resp['result']['freeform'] == 'shm':
+            freeform = []
+            for shm in self._freeform_output_shm:
+                freeform.append(shm['array'].tolist())
+            send_resp['result']['freeform'] = freeform
+
         return send_resp
 
     def set_threshold(self, obj):
