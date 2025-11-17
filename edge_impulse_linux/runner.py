@@ -24,7 +24,7 @@ class ImpulseRunner:
         self._allow_shm = allow_shm
         self._input_shm = None
         self._freeform_output_shm = []
-        self._timeout = timeout
+        self._timeout = timeout if not allow_shm else None
 
     def init(self, debug=False):
         if not os.path.exists(self._model_path):
