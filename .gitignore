@@ -5,6 +5,7 @@ build
 *.jpg
 .DS_Store
 .venv/
+venv/
 .vscode
 *.eim
 .act-secrets
