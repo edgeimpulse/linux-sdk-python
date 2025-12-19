@@ -24,9 +24,11 @@ class ImpulseRunner:
         self._allow_shm = allow_shm
         self._input_shm = None
         self._freeform_output_shm = []
-        self._timeout = timeout
+        self._timeout = timeout if not allow_shm else None
 
-    def init(self, debug=False):
+    def init(self, debug=False, dynamic_input_size: tuple = False):
+        self._dynamic_input_size = dynamic_input_size
+        self._allow_shm = self._allow_shm and (dynamic_input_size == False)
         if not os.path.exists(self._model_path):
             raise Exception("Model file does not exist: " + self._model_path)
 
@@ -58,6 +60,15 @@ class ImpulseRunner:
         self._client.connect(socket_path)
 
         hello_resp = self._hello_resp = self.hello()
+
+        if self._dynamic_input_size:
+            width, height, channels = self._dynamic_input_size
+            resp = self.set_parameters({
+                'image_width': width,
+                'image_height': height,
+                'image_channels': channels
+            })
+            hello_resp['features_shm']['elements'] = width * height
 
         if self._allow_shm:
             if ('features_shm' in hello_resp.keys()):
@@ -149,6 +160,29 @@ class ImpulseRunner:
             raise Exception('set_threshold requires an object with an "id" field')
 
         msg = { 'set_threshold': obj }
+        return self.send_msg(msg)
+
+    def set_parameter(self, obj):
+        if not 'id' in obj:
+            raise Exception('set_threshold requires an object with an "id" field')
+
+        msg = { 'set_parameter': obj }
+        return self.send_msg(msg)
+
+    def set_parameters(self, *kwargs):
+        msg = { 'set_parameter': kwargs[0] }
+        return self.send_msg(msg)
+
+    def set_image_input_parameters(self, width, height, channels):
+        msg = {
+            'set_parameter': {
+                'width': width,
+                'height': height,
+                'channels': channels
+            }
+        }
+        self.dim = (width, height)
+        self.isGrayscale = (channels == 1)
         return self.send_msg(msg)
 
     def send_msg(self, msg):

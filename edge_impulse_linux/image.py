@@ -21,10 +21,10 @@ class ImageImpulseRunner(ImpulseRunner):
         self.isGrayscale = False
         self.resizeMode = ''
 
-    def init(self, debug=False):
-        model_info = super(ImageImpulseRunner, self).init(debug)
-        width = model_info['model_parameters']['image_input_width']
-        height = model_info['model_parameters']['image_input_height']
+    def init(self, debug=False, dynamic_input_size: tuple = False):
+        model_info = super(ImageImpulseRunner, self).init(debug, dynamic_input_size)
+        width = model_info['model_parameters']['image_input_width'] if not dynamic_input_size else dynamic_input_size[0]
+        height = model_info['model_parameters']['image_input_height'] if not dynamic_input_size else dynamic_input_size[1]
 
         if width == 0 or height == 0:
             raise Exception('Model file "' + self._model_path + '" is not suitable for image recognition')
