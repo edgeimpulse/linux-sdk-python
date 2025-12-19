@@ -118,14 +118,15 @@ def main(argv):
                     detections = []
                     for bb in res["result"]["bounding_boxes"]:
                         x, y, w, h = bb['x'], bb['y'], bb['width'], bb['height']
+                        img = cv2.rectangle(img, (bb['x'], bb['y']), (bb['x'] + bb['width'], bb['y'] + bb['height']), (255, 0, 0), 1)
                         detections.append([x + w/2, y + h/2, w, h]) # For FOMO, we might want to pass a larger box than the detected one
 
                     tracked_objects = tracker.update(detections)
                     for track_id, (x, y, w, h) in tracked_objects:
                         x1, y1 = int(x - w/2), int(y - h/2)
                         x2, y2 = int(x + w/2), int(y + h/2)
-                        cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                        cv2.putText(img, f"ID: {track_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
+                        # cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                        cv2.putText(img, f"ID: {track_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 1)
 
                 if (show_camera):
                     cv2.imshow('edgeimpulse', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
